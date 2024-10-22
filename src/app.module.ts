@@ -16,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
       ProductModule,
       VendorModule,
       CartModule,
+   
       ConfigModule.forRoot({
          isGlobal: true,
       }),

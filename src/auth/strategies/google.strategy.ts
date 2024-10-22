@@ -2,6 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { Injectable } from '@nestjs/common';
 import { log } from 'node:console';
+import { AuthProviders } from 'src/common/enums';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -30,7 +31,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
          socialId: id,
          firstName: name.givenName,
          lastName: name.familyName,
-         provider: 'google',
+         provider: AuthProviders.GOOGLE,
       };
 
       done(null, user);

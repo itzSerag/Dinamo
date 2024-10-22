@@ -22,7 +22,7 @@ import { FacebookStrategy } from './strategies/facebook.strategy';
       UserModule,
       PassportModule.register({ defaultStrategy: 'jwt' }),
       JwtModule.register({
-         secret: 'SECRET',
+         secret: 'supa-secret-its-a-public-sec',
          signOptions: { expiresIn: '20d' },
       }),
    ],

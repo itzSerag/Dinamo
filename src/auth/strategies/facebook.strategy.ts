@@ -1,6 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
 import { Injectable } from '@nestjs/common';
+import { AuthProviders } from 'src/common/enums';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
@@ -25,7 +26,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
          socialId: id,
          firstName: name.givenName,
          lastName: name.familyName,
-         provider: 'facebook',
+         provider: AuthProviders.FACEBOOK,
       };
 
       done(null, user);

@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 
-export class SignupDto {
+export class CreateUserDTO {
    @IsString()
    @IsNotEmpty()
    firstName: string;
@@ -9,8 +9,11 @@ export class SignupDto {
    @IsNotEmpty()
    lastName: string;
 
+   // must be lenfth of 11
+
    @IsString()
    @IsNotEmpty()
+   @Length(11, 11)
    phoneNumber: string;
 
    @IsString()

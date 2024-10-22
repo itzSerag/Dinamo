@@ -2,6 +2,8 @@ import {
    Body,
    Controller,
    Get,
+   HttpException,
+   HttpStatus,
    Post,
    Req,
    Res,
@@ -14,7 +16,9 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { JWTPayload } from './interfaces';
 import { LoginDto } from './dto';
-import { SignupDto } from './dto/signup.dto';
+import { CreateUserDTO } from './dto/createUser.dto';
+import { JwtAuthGuard } from './guards/jwt.auth.guard';
+import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
@@ -24,14 +28,15 @@ export class AuthController {
    ) {}
 
    @Post('signup')
-   async signup(@Body() user: SignupDto) {
-      const jwt = await this.authService.signup(
-         user.firstName,
-         user.lastName,
-         user.phoneNumber,
-         user.password,
-      );
-      return { access_token: jwt };
+   async signup(@Body() user: CreateUserDTO) {
+      const access_token = await this.authService.signup(user);
+      if (!access_token) {
+         throw new HttpException(
+            'something went wrong',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+         );
+      }
+      return access_token;
    }
 
    @Post('login')
@@ -56,6 +61,7 @@ export class AuthController {
       const payload: JWTPayload = {
          userId: user._id,
          username: user.firstName,
+         role: user.role,
       };
 
       const jwt = await this.authService.__generateToken(payload);
@@ -80,9 +86,16 @@ export class AuthController {
       const payload: JWTPayload = {
          userId: user._id,
          username: user.firstName,
+         role: user.role,
       };
 
       const jwt = await this.authService.__generateToken(payload);
       res.redirect(`${process.env.WEBSITE_URL}/callback?token=${jwt}`);
+   }
+
+   @Get('pro')
+   async protectedRoute(@Req() req) {
+      log(req);
+      return;
    }
 }

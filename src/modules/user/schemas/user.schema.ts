@@ -1,63 +1,111 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import { AuthProviders, Role } from '../../../common/enums';
 
-enum AuthProvider {
-   LOCAL = 'local',
-   GOOGLE = 'google',
-   FACEBOOK = 'facebook',
-}
-
-@Schema({ timestamps: true })
+@Schema({
+   timestamps: true,
+   toJSON: {
+      transform: (_, ret) => {
+         // Remove the password from the response
+         delete ret.password;
+         return ret;
+      },
+   },
+})
 export class User extends Document {
-   @Prop({ required: true })
+   @Prop({ required: true, trim: true })
    firstName: string;
 
-   @Prop({ required: true })
+   @Prop({ required: true, trim: true })
    lastName: string;
 
-   // false for now because we already have Outh
-   // if the app for only specific country, we can make it specific length // for this country
-   @Prop({ required: false, unique: true })
+   @Prop({
+      required: true,
+      unique: true,
+      trim: true,
+      index: true,
+   })
    phoneNumber: string;
 
-   @Prop({ required: false })
-   socialId?: string;
+   @Prop({
+      required: false,
+   })
+   socialId?: string; // Allow undefined instead of null
 
    @Prop({ default: false })
    isVerified: boolean;
 
-   @Prop({ type: [{ type: Types.ObjectId, ref: 'Address' }] })
-   addresses: Types.ObjectId[];
+   // Lets make it just one address and string -- already git the address schema with me but as u know 2 days only
+   @Prop({ required: false })
+   address: string;
 
-   @Prop({ type: Types.ObjectId, ref: 'Cart' })
+   @Prop({
+      type: Types.ObjectId,
+      ref: 'Cart',
+      default: null,
+   })
    activeCart: Types.ObjectId;
 
-   /* making it optional for Outh users (for now) // 
-  will be required in DTOs in login/signup path with local strategy
-  */
-   @Prop({})
+   // Password for local login
+   @Prop({
+      required: false,
+      minlength: 6,
+   })
    password?: string;
 
-   @Prop({ required: true, default: AuthProvider.LOCAL })
-   provider: AuthProvider;
+   @Prop({
+      required: true,
+      default: AuthProviders.LOCAL,
+      enum: AuthProviders,
+   })
+   provider: AuthProviders;
 
+   @Prop({
+      default: Role.USER,
+      enum: Role,
+      required: true,
+   })
+   role: Role;
+
+   // Virtual for full name
+   get fullName(): string {
+      return `${this.firstName} ${this.lastName}`;
+   }
+
+   // Instance method for password validation
    async validatePassword(password: string): Promise<boolean> {
+      if (!this.password) return false;
       return await bcrypt.compare(password, this.password);
    }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
+// Add virtuals
+UserSchema.virtual('fullName').get(function () {
+   return `${this.firstName} ${this.lastName}`;
+});
+
+// Add instance methods
 UserSchema.methods.validatePassword = async function (
    password: string,
 ): Promise<boolean> {
+   if (!this.password) return false;
    return await bcrypt.compare(password, this.password);
 };
 
+// Middleware for password hashing
 UserSchema.pre('save', async function (next) {
-   // hash it when its new or modified else ---> keep goin
-   if (!this.isModified('password') || !this.password) return next();
-   this.password = await bcrypt.hash(this.password, 10);
-   next();
+   try {
+      if (!this.isModified('password') || !this.password) {
+         return next();
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+      next();
+   } catch (error) {
+      next(error);
+   }
 });

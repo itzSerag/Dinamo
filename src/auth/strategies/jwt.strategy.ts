@@ -3,18 +3,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWTPayload } from '../interfaces';
 import { UserService } from 'src/modules/user/user.service';
-import { ConfigService } from '@nestjs/config';
+import { log } from 'console';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-   constructor(
-      private userService: UserService,
-      configService: ConfigService,
-   ) {
+   constructor(private userService: UserService) {
       super({
          jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
          ignoreExpiration: false,
-         secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+         secretOrKey: 'supa-secret-its-a-public-sec',
       });
    }
 
@@ -23,12 +20,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       // so i can use the user in the controller
 
       const user = await this.userService.findUserById(payload.userId);
+
       if (!user) {
          return null;
       }
 
-      // not the best solution i know but 2 days u know
-      user.password = undefined;
+      log(user);
+
       return user;
    }
 }

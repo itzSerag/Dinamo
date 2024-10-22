@@ -1,4 +1,4 @@
-export enum Providers {
+export enum AuthProviders {
    LOCAL = 'local',
    GOOGLE = 'google',
    FACEBOOK = 'facebook',

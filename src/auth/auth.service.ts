@@ -4,40 +4,38 @@ import { Model } from 'mongoose';
 import { User } from 'src/modules/user/schemas/user.schema';
 import { JWTPayload } from './interfaces';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDTO } from './dto';
+import { UserService } from 'src/modules/user/user.service';
+import { log } from 'console';
 
 @Injectable()
 export class AuthService {
    constructor(
       @InjectModel(User.name) private userModel: Model<User>,
       private jwtService: JwtService,
+      private userService: UserService,
    ) {}
 
-   async signup(
-      firstName: string,
-      lastName: string,
-      phoneNumber: string,
-      password: string,
-   ): Promise<string> {
-      const existingUser = await this.userModel.findOne({ phoneNumber });
+   async signup(user: CreateUserDTO) {
+      const existingUser = await this.userModel.findOne({
+         phoneNumber: user.phoneNumber,
+      });
       if (existingUser) {
          throw new UnauthorizedException('User already registered');
       }
 
-      const user = await this.userModel.create({
-         firstName,
-         lastName,
-         phoneNumber,
-         password,
-         provider: 'local',
-      });
-
-      // we gotta throw it somewhere AAAH
+      const newUser = await this.userService.createUser(user);
+      log(newUser);
       const payload: JWTPayload = {
-         userId: user._id,
-         username: user.firstName,
+         userId: newUser._id,
+         username: newUser.firstName,
+         role: newUser.role,
       };
 
-      return await this.__generateToken(payload);
+      const jwt = await this.__generateToken(payload);
+      return {
+         access_token: jwt,
+      };
    }
 
    async login(
@@ -55,6 +53,7 @@ export class AuthService {
       const payload: JWTPayload = {
          userId: user._id,
          username: user.firstName,
+         role: user.role,
       };
 
       const jwt = await this.__generateToken(payload);
