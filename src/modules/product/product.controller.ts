@@ -13,7 +13,7 @@ import {
 import { ProductService } from '../product/product.service';
 import { CreateProductDTO, UpdateProductDTO } from '../product/dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
-import { VendorGuard } from 'src/common/guards/vendor.guard';
+import { VendorGuard } from '../../common/guards';
 
 @UseGuards(JwtAuthGuard)
 @Controller('product')
