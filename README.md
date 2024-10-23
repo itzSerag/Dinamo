@@ -303,7 +303,8 @@ see postman documenatations on : https://documenter.getpostman.com/view/34422718
 
 ###  Prerequisites
 
-**TypeScript**: `version x.y.z`
+**TypeScript**: `version`
+**NodeJs**: `version`
 
 ###  Installation
 
