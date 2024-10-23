@@ -95,7 +95,7 @@ UserSchema.methods.validatePassword = async function (
    return await bcrypt.compare(password, this.password);
 };
 
-// Middleware for password hashing
+   // HASHINGG
 UserSchema.pre('save', async function (next) {
    try {
       if (!this.isModified('password') || !this.password) {

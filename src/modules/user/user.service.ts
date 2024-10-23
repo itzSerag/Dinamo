@@ -9,7 +9,10 @@ export class UserService {
    constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
    async createUser(user: CreateUserDTO): Promise<User> {
-      return this.userModel.create(user);
+      return await this.userModel.create({
+         ...user
+         
+      });
    }
 
    async findUserById(userId: any): Promise<User> {

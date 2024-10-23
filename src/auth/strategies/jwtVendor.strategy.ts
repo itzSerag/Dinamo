@@ -2,12 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWTPayload } from '../interfaces';
-import { UserService } from 'src/modules/user/user.service';
 import { log } from 'console';
+import { VendorService } from 'src/modules/vendor/vendor.service';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-   constructor(private userService: UserService) {
+export class JWTVendorStrategy extends PassportStrategy(
+   Strategy,
+   'jwt-vendor',
+) {
+   constructor(
+      // making a circular dependency u see
+      private vendorService: VendorService,
+   ) {
       super({
          jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
          ignoreExpiration: false,
@@ -19,14 +25,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       // i want it to return the user
       // so i can use the user in the controller
 
-      const user = await this.userService.findUserById(payload.userId);
+      const vendor = await this.vendorService.getVendorById(payload.userId);
 
-      if (!user) {
+      if (!vendor) {
          return null;
       }
 
-      log(user);
+      log(vendor);
 
-      return user;
+      return vendor;
    }
 }

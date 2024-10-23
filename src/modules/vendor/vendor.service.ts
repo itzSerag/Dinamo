@@ -19,10 +19,17 @@ export class VendorService {
    ) {}
 
    async createVendor(createVendorDTO: CreateVendorDTO): Promise<string> {
-      const newVendor = new this.vendorModel(createVendorDTO);
       try {
-         // eslint-disable-next-line no-var
-         var vendor = await newVendor.save();
+         const newVendor = new this.vendorModel(createVendorDTO);
+         const vendor = await newVendor.save();
+
+         log(vendor);
+         const payload: JWTPayload = {
+            userId: vendor._id,
+            username: vendor.name,
+         };
+
+         return await this.authService.__generateToken(payload);
       } catch (error) {
          // got trick here -- insted of searching
          if (error.code === 11000) {
@@ -31,12 +38,6 @@ export class VendorService {
             throw new Error(error);
          }
       }
-      const payload: JWTPayload = {
-         userId: vendor._id,
-         username: vendor.name,
-      };
-
-      return await this.authService.__generateToken(payload);
    }
 
    async login(loginVendorDTO: LoginVendorDTO): Promise<string> {
@@ -46,7 +47,8 @@ export class VendorService {
 
       log(vendor);
       if (vendor && !(await vendor.validatePassword(loginVendorDTO.password))) {
-         throw new NotFoundException('Invalid credentials');
+         log('Invalid credentials in Services here');
+         throw new NotFoundException('Invalid credentialssss');
       }
 
       const payload: JWTPayload = {

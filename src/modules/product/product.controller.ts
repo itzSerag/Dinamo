@@ -12,16 +12,25 @@ import {
 
 import { ProductService } from '../product/product.service';
 import { CreateProductDTO, UpdateProductDTO } from '../product/dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { VendorGuard } from '../../common/guards';
+import { log } from 'console';
+import { JWTVendorAuthGuard } from 'src/auth/guards/jwtVendor.auth.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JWTVendorAuthGuard)
 @Controller('product')
 export class ProductController {
    constructor(private readonly productService: ProductService) {}
 
+   @Get('vendor')
+   async getProductsForVendor(@Req() req) {
+      const vendorId = req.user._id;
+      log('user: ' + req.user);
+      console.log(vendorId);
+
+      return await this.productService.getProductsForVendor(vendorId);
+   }
+
    @Post('vendor')
-   @UseGuards(VendorGuard)
    async createProduct(@Req() req, @Body() createProductDTO: CreateProductDTO) {
       const vendorId = req.user._id;
       return this.productService.createProductForVendor(
@@ -30,15 +39,7 @@ export class ProductController {
       );
    }
 
-   @Get('vendor')
-   @UseGuards(VendorGuard)
-   async getProductsForVendor(@Req() req) {
-      const vendorId = req.user._id;
-      return this.productService.getProductsForVendor(vendorId);
-   }
-
    @Put('vendor/:id')
-   @UseGuards(VendorGuard)
    async updateProduct(
       @Req() req,
       @Param('id') productId: string,

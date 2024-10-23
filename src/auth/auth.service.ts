@@ -25,7 +25,8 @@ export class AuthService {
       }
 
       const newUser = await this.userService.createUser(user);
-      log(newUser);
+      newUser.save();
+      
       const payload: JWTPayload = {
          userId: newUser._id,
          username: newUser.firstName,
