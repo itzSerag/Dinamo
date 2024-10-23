@@ -95,7 +95,7 @@ see postman documenatations on : https://documenter.getpostman.com/view/34422718
 
 ---
 
-##  Modules
+##  Modules And detailed folders and files
 
 
 <details closed><summary>src</summary>
@@ -329,5 +329,5 @@ Build the project from source:
 To run the project, execute the following command:
 
 ```sh
-❯ npm run build && node dist/main.js
+❯ npm run start
 ```
